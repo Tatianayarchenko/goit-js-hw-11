@@ -1,0 +1,16 @@
+<div style='display: flex;'>
+  <img
+    src='{{flags.svg}}'
+    alt='{{name.official}}'
+    width='60px'
+    height='40px'
+    style='margin-right: 20px;'
+  />
+  <h1>{{name.official}}</h1>
+</div>
+
+<p><span style='font-weight: 700;'>Capital: </span>{{capital}}</p>
+<p><span style='font-weight: 700;'>Population: </span>{{population}}</p>
+{{#each languages}}
+  <p><span style='font-weight: 700;'>Languages: </span>{{this}}</p>
+{{/each}}
