@@ -1,46 +1,43 @@
-import axios from 'axios';
-import Notiflix from 'notiflix';
 import images from './templates/images';
+import PixabayService from './pixabay-service';
 
 const refs = {
   form: document.querySelector('#search-form'),
   gallery: document.querySelector('.gallery'),
+  loadMoreButton: document.querySelector('.load-more'),
 };
+const pixabayService = new PixabayService();
 
-refs.form.addEventListener('submit', onFormSubmit);
+refs.form.addEventListener('submit', onSearch);
+refs.loadMoreButton.addEventListener('click', onButtonLoadMoreClick);
 
-function onFormSubmit(e) {
+function onSearch(e) {
   e.preventDefault();
-  // const delay = Number(form.elements.delay.value);
-  const inputValue = refs.form.elements.searchQuery.value;
-  console.log(inputValue);
-  // fetch(
-  //   `https://pixabay.com/api/?key=27599819-5f2242c0de29668fb10ee249b&q=${inputValue}&image_type=photo&orientation=horizontal&safesearch=true`,
-  // )
-  //   .then(response => response.json())
-  //   .then(value => {
-  //     console.log(value);
-  //   });
 
-  axios(
-    `https://pixabay.com/api/?key=27599819-5f2242c0de29668fb10ee249b&q=${inputValue}&image_type=photo&orientation=horizontal&safesearch=true`,
-  ).then(resalt => {
-    const data = resalt.data.hits;
-    console.log(data);
-    if (data.length === 0) {
-      Notiflix.Notify.failure(
-        'Sorry, there are no images matching your search query. Please try again.',
-      );
-    }
+  pixabayService.query = refs.form.elements.searchQuery.value;
 
-    renderGalery(data);
-  });
+  pixabayService.resetPage();
+  pixabayService.fetchImages().then(data => console.log(data));
 }
 
-function renderGalery(data) {
-  const markup = data.map(images).join('');
-  refs.gallery.insertAdjacentHTML('afterbegin', markup);
+function onButtonLoadMoreClick() {
+  console.log('клік по кнопці');
+  pixabayService.fetchImages();
 }
+
+// function renderGalery(data) {
+//   const markup = data.map(images).join('');
+//   refs.gallery.insertAdjacentHTML('afterbegin', markup);
+// }
+// renderGalery(data);
+
+// fetch(
+//   `https://pixabay.com/api/?key=27599819-5f2242c0de29668fb10ee249b&q=${searchQuery}&image_type=photo&orientation=horizontal&safesearch=true`,
+// )
+//   .then(response => response.json())
+//   .then(value => {
+//     console.log(value);
+//   });
 
 // ==============================================
 // <!-- другое решение -->

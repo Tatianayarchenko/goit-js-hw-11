@@ -1,3 +1,45 @@
+import axios from 'axios';
+import Notiflix from 'notiflix';
+
+export default class PixabayService {
+  constructor() {
+    this.searchQuery = '';
+    this.page = 1;
+  }
+  fetchImages() {
+    // console.log(this);
+    return axios(
+      `https://pixabay.com/api/?key=27599819-5f2242c0de29668fb10ee249b&q=${this.searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&page=${this.page}`,
+    ).then(resalt => {
+      const data = resalt.data.hits;
+      if (data.length === 0) {
+        Notiflix.Notify.failure(
+          'Sorry, there are no images matching your search query. Please try again.',
+        );
+      }
+      this.incrementPage();
+
+      //   console.log(data);
+      return data;
+    });
+  }
+  incrementPage() {
+    this.page += 1;
+  }
+
+  resetPage() {
+    this.page = 1;
+  }
+
+  get query() {
+    return this.searchQuery;
+  }
+
+  set query(newQuery) {
+    this.searchQuery = newQuery;
+  }
+}
+
 // ===========================================
 
 // <!-- другое решение -->
