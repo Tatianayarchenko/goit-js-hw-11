@@ -1,5 +1,6 @@
 import images from './templates/images';
 import PixabayService from './pixabay-service';
+import Notiflix from 'notiflix';
 
 const refs = {
   form: document.querySelector('#search-form'),
@@ -15,21 +16,32 @@ function onSearch(e) {
   e.preventDefault();
 
   pixabayService.query = refs.form.elements.searchQuery.value;
-
+  if (pixabayService.query === '') {
+    return Notiflix.Notify.warning('Please enter a request.');
+  }
   pixabayService.resetPage();
-  pixabayService.fetchImages().then(data => console.log(data));
+  pixabayService.fetchImages().then(images => {
+    clearGalery();
+    renderGalery(images);
+    if (images.length === 0) {
+      Notiflix.Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.',
+      );
+    }
+  });
 }
 
 function onButtonLoadMoreClick() {
-  console.log('клік по кнопці');
-  pixabayService.fetchImages();
+  pixabayService.fetchImages(renderGalery);
 }
 
-// function renderGalery(data) {
-//   const markup = data.map(images).join('');
-//   refs.gallery.insertAdjacentHTML('afterbegin', markup);
-// }
-// renderGalery(data);
+function renderGalery(data) {
+  refs.gallery.insertAdjacentHTML('beforeend', images(data));
+}
+
+function clearGalery() {
+  refs.gallery.innerHTML = '';
+}
 
 // fetch(
 //   `https://pixabay.com/api/?key=27599819-5f2242c0de29668fb10ee249b&q=${searchQuery}&image_type=photo&orientation=horizontal&safesearch=true`,

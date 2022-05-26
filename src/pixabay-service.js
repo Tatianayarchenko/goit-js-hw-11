@@ -1,6 +1,9 @@
 import axios from 'axios';
 import Notiflix from 'notiflix';
 
+const API_KEY = '27599819-5f2242c0de29668fb10ee249b';
+const BASE_URL = 'pixabay.com/api';
+
 export default class PixabayService {
   constructor() {
     this.searchQuery = '';
@@ -9,18 +12,21 @@ export default class PixabayService {
   fetchImages() {
     // console.log(this);
     return axios(
-      `https://pixabay.com/api/?key=27599819-5f2242c0de29668fb10ee249b&q=${this.searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&page=${this.page}`,
+      `https://${BASE_URL}/?key=${API_KEY}&q=${this.searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&page=${this.page}`,
     ).then(resalt => {
       const data = resalt.data.hits;
-      if (data.length === 0) {
-        Notiflix.Notify.failure(
-          'Sorry, there are no images matching your search query. Please try again.',
-        );
-      }
+
       this.incrementPage();
 
-      //   console.log(data);
+      console.log(data);
       return data;
+
+      // деструктуризация Репета Модуль 12. REST-пагинация и 1:05:46 бесконечный скрол.
+      //   ({ hits }) => {
+      //     this.incrementPage();
+
+      //     console.log(hits);
+      //     return hits;
     });
   }
   incrementPage() {
