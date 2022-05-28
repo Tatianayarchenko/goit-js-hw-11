@@ -3,12 +3,25 @@ import PixabayService from './pixabay-service';
 import Notiflix from 'notiflix';
 import LoadMoreButton from './components/load_more_btn';
 
+import SimpleLightbox from 'simplelightbox';
+// import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
+// import 'simplelightbox/dist/simple-lightbox.min.css';
+
 const refs = {
   form: document.querySelector('#search-form'),
   gallery: document.querySelector('.gallery'),
 };
 const pixabayService = new PixabayService();
 const loadMoreButton = new LoadMoreButton({ selector: '.load-more', hidden: true });
+
+const simpleLightbox = new SimpleLightbox('.image-link', {
+  // captionPosition: 'bottom',
+  // captionsData: 'alt',
+  // captionDelay: 250,
+  // overlayOpacity: 0.4,
+  // animationSpeed: 100,
+});
 
 refs.form.addEventListener('submit', onSearch);
 loadMoreButton.button.addEventListener('click', onButtonLoadMoreClick);
@@ -33,30 +46,10 @@ async function onSearch(e) {
 
   clearGalery();
   renderGalery(resalt.hits);
+  Notiflix.Notify.success(`Hooray! We found ${resalt.totalHits} images.`);
+  simpleLightbox.refresh();
   loadMoreButton.show();
 }
-
-// function onSearch(e) {
-//   e.preventDefault();
-
-//   pixabayService.query = refs.form.elements.searchQuery.value;
-//   if (pixabayService.query === '') {
-//     return Notiflix.Notify.warning('Please enter a request.');
-//   }
-//   pixabayService.resetPage();
-
-//   pixabayService.fetchImages().then(resalt => {
-//     if (resalt.hits.length === 0) {
-//       clearGalery();
-//       return Notiflix.Notify.failure(
-//         'Sorry, there are no images matching your search query. Please try again.',
-//       );
-//     }
-//     clearGalery();
-//     renderGalery(resalt.hits);
-//     loadMoreButton.show();
-//   });
-// }
 
 function renderGalery(data) {
   refs.gallery.insertAdjacentHTML('beforeend', images(data));
@@ -67,6 +60,8 @@ async function onButtonLoadMoreClick() {
     const resalt = await pixabayService.fetchImages();
 
     renderGalery(resalt.hits);
+
+    simpleLightbox.refresh();
     const max_page = resalt.totalHits / 40;
     if (pixabayService.page > max_page) {
       loadMoreButton.hide();
@@ -77,18 +72,6 @@ async function onButtonLoadMoreClick() {
   }
 }
 
-// function onButtonLoadMoreClick() {
-//   pixabayService.fetchImages().then(resalt => {
-//     renderGalery(resalt.hits);
-//     const totalHits = resalt.totalHits;
-//     const max_page = totalHits / 40;
-//     if (pixabayService.page > max_page) {
-//       loadMoreButton.hide();
-//       Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
-//     }
-//   });
-// }
-
 function renderGalery(data) {
   refs.gallery.insertAdjacentHTML('beforeend', images(data));
 }
@@ -98,10 +81,7 @@ function clearGalery() {
   loadMoreButton.hide();
 }
 // ==============================================
-// / const img = res.hits;
-// console.log(img);
-// const totalHits = res.totalHits;
-// console.log(totalHits);
+//
 // ==============================================
 
 // loadBtn.button.addEventListener('click', onButtonLoadMoreClick);
