@@ -1,18 +1,19 @@
 import images from './templates/images';
 import PixabayService from './pixabay-service';
 import Notiflix from 'notiflix';
+import LoadMoreButton from './components/load_more_btn';
 
 const refs = {
   form: document.querySelector('#search-form'),
   gallery: document.querySelector('.gallery'),
-  loadMoreButton: document.querySelector('.load-more'),
 };
 const pixabayService = new PixabayService();
+const loadMoreButton = new LoadMoreButton({ selector: '.load-more', hidden: true });
 
 refs.form.addEventListener('submit', onSearch);
-refs.loadMoreButton.addEventListener('click', onButtonLoadMoreClick);
+loadMoreButton.button.addEventListener('click', onButtonLoadMoreClick);
 
-function onSearch(e) {
+async function onSearch(e) {
   e.preventDefault();
 
   pixabayService.query = refs.form.elements.searchQuery.value;
@@ -20,20 +21,73 @@ function onSearch(e) {
     return Notiflix.Notify.warning('Please enter a request.');
   }
   pixabayService.resetPage();
-  pixabayService.fetchImages().then(images => {
+
+  const resalt = await pixabayService.fetchImages();
+
+  if (resalt.hits.length === 0) {
     clearGalery();
-    renderGalery(images);
-    if (images.length === 0) {
-      Notiflix.Notify.failure(
-        'Sorry, there are no images matching your search query. Please try again.',
-      );
-    }
-  });
+    return Notiflix.Notify.failure(
+      'Sorry, there are no images matching your search query. Please try again.',
+    );
+  }
+
+  clearGalery();
+  renderGalery(resalt.hits);
+  loadMoreButton.show();
 }
 
-function onButtonLoadMoreClick() {
-  pixabayService.fetchImages(renderGalery);
+// function onSearch(e) {
+//   e.preventDefault();
+
+//   pixabayService.query = refs.form.elements.searchQuery.value;
+//   if (pixabayService.query === '') {
+//     return Notiflix.Notify.warning('Please enter a request.');
+//   }
+//   pixabayService.resetPage();
+
+//   pixabayService.fetchImages().then(resalt => {
+//     if (resalt.hits.length === 0) {
+//       clearGalery();
+//       return Notiflix.Notify.failure(
+//         'Sorry, there are no images matching your search query. Please try again.',
+//       );
+//     }
+//     clearGalery();
+//     renderGalery(resalt.hits);
+//     loadMoreButton.show();
+//   });
+// }
+
+function renderGalery(data) {
+  refs.gallery.insertAdjacentHTML('beforeend', images(data));
 }
+
+async function onButtonLoadMoreClick() {
+  try {
+    const resalt = await pixabayService.fetchImages();
+
+    renderGalery(resalt.hits);
+    const max_page = resalt.totalHits / 40;
+    if (pixabayService.page > max_page) {
+      loadMoreButton.hide();
+      Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
+    }
+  } catch (error) {
+    Notiflix.Notify.failure('Sorry, something is wrong. Please try again.');
+  }
+}
+
+// function onButtonLoadMoreClick() {
+//   pixabayService.fetchImages().then(resalt => {
+//     renderGalery(resalt.hits);
+//     const totalHits = resalt.totalHits;
+//     const max_page = totalHits / 40;
+//     if (pixabayService.page > max_page) {
+//       loadMoreButton.hide();
+//       Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
+//     }
+//   });
+// }
 
 function renderGalery(data) {
   refs.gallery.insertAdjacentHTML('beforeend', images(data));
@@ -41,16 +95,28 @@ function renderGalery(data) {
 
 function clearGalery() {
   refs.gallery.innerHTML = '';
+  loadMoreButton.hide();
 }
+// ==============================================
+// / const img = res.hits;
+// console.log(img);
+// const totalHits = res.totalHits;
+// console.log(totalHits);
+// ==============================================
 
-// fetch(
-//   `https://pixabay.com/api/?key=27599819-5f2242c0de29668fb10ee249b&q=${searchQuery}&image_type=photo&orientation=horizontal&safesearch=true`,
-// )
-//   .then(response => response.json())
-//   .then(value => {
-//     console.log(value);
-//   });
-
+// loadBtn.button.addEventListener('click', onButtonLoadMoreClick);
+// const loadBtn = {
+//   button: document.querySelector('.load-more'),
+//   show() {
+//     this.button.classList.remove('is-hidden');
+//     console.log('кнопка появилась');
+//   },
+//   hide() {
+//     this.button.classList.add('is-hidden');
+//     console.log('кнопка спряталась');
+//   },
+// };
+// loadBtn.hide();
 // ==============================================
 // <!-- другое решение -->
 
